@@ -36,6 +36,24 @@ public class MusicXMLParser {
 		}
 		System.out.println("Software: " + musicXMLFile.getSoftware());
 		System.out.println("Encoding Date: " + musicXMLFile.getEncodingDate());
+		if (!musicXMLFile.getAllSupports().isEmpty()) {
+			System.out.println("======");
+			for (String element : musicXMLFile.getAllSupports().keySet()) {
+				SupportData sdata = musicXMLFile.getSupport(element);
+				System.out.println("Element: " + element);
+				System.out.println("  Type: " + (sdata.getType() ? "yes" : "no"));
+				
+				if (!sdata.getAllAttributes().isEmpty()) {
+					for (String attribute : sdata.getAllAttributes().keySet()) {
+						System.out.println("  Attribute: " + attribute);
+						System.out.println("    Value: " + sdata.getAttributeValue(attribute));
+					}
+				}
+			}
+			System.out.println("======");
+		} else {
+			System.out.println("No supports.");
+		}
 	}
 	
 	public static MusicXMLFile parse(File musicXMLFile) throws FileNotFoundException, MusicXMLParserException {
@@ -94,11 +112,26 @@ public class MusicXMLParser {
 								} catch (Exception ex) {
 									throw new MusicXMLParserException("Malformed date in 'encoding-date' tag: " + encodingChild.getValue());
 								}
+							} else if (encodingChild.getLocalName().equalsIgnoreCase("supports")) {
+								if (encodingChild.getAttributeValue("element") == null || encodingChild.getAttributeValue("type") == null) {
+									throw new MusicXMLParserException("Malformed supports tag. Tag is missing 'element' attribute or 'type' attribute.");
+								}
+								
+								if (encodingChild.getAttributeValue("attribute") != null) {
+									boolean good = musicXML.addSupport(encodingChild.getAttributeValue("element"),
+														(encodingChild.getAttributeValue("type").equalsIgnoreCase("yes") ? true : false),
+														encodingChild.getAttributeValue("attribute"),
+														encodingChild.getAttributeValue("value"));
+									if (!good) {
+										throw new MusicXMLParserException("The 'value' attribute for a 'supports' tag was non-existant, but an 'attribute' attribute existed for that same tag.");
+									}
+								} else {
+									musicXML.addSupport(encodingChild.getAttributeValue("element"), (encodingChild.getAttributeValue("type").equalsIgnoreCase("yes") ? true : false));
+								}
 							}
 							
 							// TODO: encoder tag
 							// TODO: encoding-description tag
-							// TODO: supports tag
 						}
 					}
 					

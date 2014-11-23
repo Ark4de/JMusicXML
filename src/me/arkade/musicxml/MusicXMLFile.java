@@ -8,12 +8,13 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class MusicXMLFile {
-	private String movementTitle = "";
 	private HashMap<String, ArrayList<String>> creators = new HashMap<String, ArrayList<String>>();
+	private HashMap<String, SupportData> supports = new HashMap<String, SupportData>();
+	private String movementTitle = "";
 	private String software = "";
 	private String encodingDate = "";
 	
-	protected MusicXMLFile() {
+	public MusicXMLFile() {
 		setEncodingDate(Calendar.getInstance().getTime());
 	}
 	
@@ -118,5 +119,62 @@ public class MusicXMLFile {
 	 */
 	public String getEncodingDate() {
 		return this.encodingDate;
+	}
+	
+	/**
+	 * <p>Marks support for a specific feature, described by the element parameter.</p>
+	 * @param element The name of the feature to be marked as supported.
+	 * @param type Not well described by the MusicXML specification, but it seems to be "yes" or "no" to if the feature is supported.
+	 * @return A boolean; <code>false</code> if value is null but attribute is not, <code>true</code> otherwise.
+	 */
+	public boolean addSupport(String element, boolean type) {
+		return addSupport(element, type, null, null);
+	}
+	
+	/**
+	 * <p>Marks support for a specific feature, described by the element parameter. Also adds or reassigns and attribute with a specific value.</p>
+	 * @param element The name of the feature to be marked as supported.
+	 * @param type Not well described by the MusicXML specification, but it seems to be "yes" or "no" to if the feature is supported.
+	 * @param attribute Attribute to the supported element. Can be null, but {@link #addSupport(String, boolean)} should be used instead.
+	 * @param value Value of the aforementioned attribute. Can be null only if the attribute is null, but {@link #addSupport(String, boolean)} should be used instead.
+	 * @return A boolean; <code>false</code> if value is null but attribute is not, <code>true</code> otherwise.
+	 */
+	public boolean addSupport(String element, boolean type, String attribute, String value) {
+		SupportData data;
+		if (supports.get(element) == null) {
+			// Element hasn't been added yet.
+			data = new SupportData(type);
+		} else {
+			data = supports.get(element);
+		}
+		
+		if (attribute != null) {
+			if (value == null) {
+				return false;
+			}
+			
+			data.setAttributeValue(attribute, value);
+		}
+		
+		supports.put(element, data);
+		
+		return true;
+	}
+	
+	/**
+	 * <p>Gets all the support data for this arrangement.</p>
+	 * @return A HashMap containing all of the SupportData for this arrangement. The key is the element name, the value is the SupportData attached to it.
+	 */
+	public HashMap<String, SupportData> getAllSupports() {
+		return this.supports;
+	}
+	
+	/**
+	 * <p>Gets the {@link SupportData} for a specific element.</p>
+	 * @param element The name of the element that you request.
+	 * @return The SupportData for the aformentioned element.
+	 */
+	public SupportData getSupport(String element) {
+		return this.supports.get(element);
 	}
 }
