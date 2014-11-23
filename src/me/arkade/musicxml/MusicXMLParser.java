@@ -35,6 +35,7 @@ public class MusicXMLParser {
 			System.out.println("No creators.");
 		}
 		System.out.println("Software: " + musicXMLFile.getSoftware());
+		System.out.println("Encoding Date: " + musicXMLFile.getEncodingDate());
 	}
 	
 	public static MusicXMLFile parse(File musicXMLFile) throws FileNotFoundException, MusicXMLParserException {
@@ -66,13 +67,13 @@ public class MusicXMLParser {
 			// TODO: movement-number tag
 			
 			Element rootChild = elems.get(i);
-			if (rootChild.getLocalName().toLowerCase().equalsIgnoreCase("movement-title")) {
+			if (rootChild.getLocalName().equalsIgnoreCase("movement-title")) {
 				musicXML.setMovementTitle(rootChild.getValue());
-			} else if (rootChild.getLocalName().toLowerCase().equalsIgnoreCase("identification")) {
+			} else if (rootChild.getLocalName().equalsIgnoreCase("identification")) {
 				for (int i1 = 0; i1 < rootChild.getChildElements().size(); i1++) {
 					Element identChild = rootChild.getChildElements().get(i1);
 					
-					if (identChild.getLocalName().toLowerCase().equalsIgnoreCase("creator")) {
+					if (identChild.getLocalName().equalsIgnoreCase("creator")) {
 						String type = identChild.getAttributeValue("type");
 						
 						if (type == null) {
@@ -80,16 +81,22 @@ public class MusicXMLParser {
 						}
 						
 						musicXML.addCreator(type, identChild.getValue());
-					} else if (identChild.getLocalName().toLowerCase().equalsIgnoreCase("encoding")) {
+					} else if (identChild.getLocalName().equalsIgnoreCase("encoding")) {
 						for (int i2 = 0; i2 < identChild.getChildElements().size(); i2++) {
 							Element encodingChild = identChild.getChildElements().get(i2);
 							
-							if (encodingChild.getLocalName().toLowerCase().equalsIgnoreCase("software")) {
+							if (encodingChild.getLocalName().equalsIgnoreCase("software")) {
 								musicXML.setSoftware(encodingChild.getValue());
+							} else if (encodingChild.getLocalName().equalsIgnoreCase("encoding-date")) {
+								try {
+									String[] date = encodingChild.getValue().split("-");
+									musicXML.setEncodingDate(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+								} catch (Exception ex) {
+									throw new MusicXMLParserException("Malformed date in 'encoding-date' tag: " + encodingChild.getValue());
+								}
 							}
 							
 							// TODO: encoder tag
-							// TODO: encoding-date tag
 							// TODO: encoding-description tag
 							// TODO: supports tag
 						}

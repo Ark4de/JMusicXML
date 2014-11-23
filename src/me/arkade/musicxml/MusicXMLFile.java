@@ -1,14 +1,20 @@
 package me.arkade.musicxml;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class MusicXMLFile {
 	private String movementTitle = "";
 	private HashMap<String, ArrayList<String>> creators = new HashMap<String, ArrayList<String>>();
 	private String software = "";
+	private String encodingDate = "";
 	
 	protected MusicXMLFile() {
+		setEncodingDate(Calendar.getInstance().getTime());
 	}
 	
 	/**
@@ -85,5 +91,32 @@ public class MusicXMLFile {
 	 */
 	public String getSoftware() {
 		return this.software;
+	}
+	
+	/**
+	 * <p>Sets the date this file was encoded. Stored in the MusicXML file as yyyy-mm-dd</p>
+	 * @param date The date of encoding.
+	 */
+	public void setEncodingDate(Date date) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		this.encodingDate = df.format(date);
+	}
+	
+	/**
+	 * <p>Sets the date this file was encoded. Stored in the MusicXML file formatted as yyyy-mm-dd</p>
+	 * @param year The year of encoding
+	 * @param month The month of encoding
+	 * @param day The day of the month of encoding
+	 */
+	public void setEncodingDate(int year, int month, int day) {
+		this.encodingDate = year + "-" + month + "-" + day;
+	}
+	
+	/**
+	 * <p>Gets the date this file was encoded.</p>
+	 * @return The date of encoding, in yyyy-mm-dd format.
+	 */
+	public String getEncodingDate() {
+		return this.encodingDate;
 	}
 }
